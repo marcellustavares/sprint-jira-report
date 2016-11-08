@@ -27,13 +27,19 @@ class JiraMetrics(object):
 		self.board_id = board_id
 		self.sprint_id = sprint_id
 
+	def sprint_completed_issues(self):
+		return self.jira.completed_issues(self.board_id, self.sprint_id)
+
 	def sprint_completed_issues_count(self):
-		completed_issues = self.jira.completed_issues(self.board_id, self.sprint_id)
+		completed_issues = self.sprint_completed_issues()
 
 		return len(completed_issues)
 
+	def sprint_incompleted_issues(self):
+		return self.jira.incompleted_issues(self.board_id, self.sprint_id)
+
 	def sprint_incompleted_issues_count(self):
-		incompleted_issues = self.jira.incompleted_issues(self.board_id, self.sprint_id)
+		incompleted_issues = self.jira.sprint_incompleted_issues()
 
 		return len(incompleted_issues)
 

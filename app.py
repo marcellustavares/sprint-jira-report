@@ -11,7 +11,11 @@ from jira import JIRA
 class JiraMetrics(object):
 	WORKFLOW = {
 		'Open': 'Idle',
+		'Backlog': 'Idle',
+		'Reopened': 'Idle',
+		'Blocked': 'Idle',
 		'Selected for Development': 'Idle',
+		'Verified': 'Idle',
 		'In Development': 'Development',
 		'In Progress': 'Development',
 		'In Review': 'Code Review',
@@ -39,13 +43,13 @@ class JiraMetrics(object):
 		return self.jira.incompleted_issues(self.board_id, self.sprint_id)
 
 	def sprint_incompleted_issues_count(self):
-		incompleted_issues = self.jira.sprint_incompleted_issues()
+		incompleted_issues = self.sprint_incompleted_issues()
 
 		return len(incompleted_issues)
 
 	def sprint_progress(self):
-		completed_issues_count = self.completed_issues_count()
-		incompleted_issues_count = self.incompleted_issues_count()
+		completed_issues_count = self.sprint_completed_issues_count()
+		incompleted_issues_count = self.sprint_incompleted_issues_count()
 
 		total_issues_count = completed_issues_count + incompleted_issues_count
 
@@ -102,9 +106,7 @@ class JiraMetrics(object):
 
 			to_swimlane['last_execution_date'] = transition_date
 
-
 		return swimlanes_metrics
-
 
 	def __get_issue_status_hitories(self, issue):
 		issue_status_histories = {}
@@ -126,6 +128,17 @@ class JiraMetrics(object):
 		delta = date1 - date2
 		return delta.seconds
 
+def print_issues_list(jiraMetrics, issues):
+	for issue in issues:
+		print '\t\thttps://issues.liferay.com/browse/%s' % issue.key
+
+		swimlanes_metrics = jiraMetrics.get_issue_swimlanes_metrics(issue.key)
+
+		print '\t\t\tIdle: %s' % swimlanes_metrics['Idle']['delta']
+		print '\t\t\tDevelopment: %s' % swimlanes_metrics['Development']['delta']
+		print '\t\t\tCode Review: %s' % swimlanes_metrics['Code Review']['delta']
+		print '\t\t\tPM Review: %s' % swimlanes_metrics['PM Review']['delta']
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 
@@ -136,8 +149,12 @@ if __name__ == '__main__':
 
 	jiraMetrics = JiraMetrics(args.username, args.password, 1718, 3946)
 
-	swimlanes_metrics = jiraMetrics.get_issue_swimlanes_metrics('LPS-65185')
+	print '---------------------'
+	print 'Sprint Metrics Report'
+	print '---------------------'
+	print '\tSprint Progress: %d' % jiraMetrics.sprint_progress()
+	print '\tCompleted Issues:'
+	print_issues_list(jiraMetrics, jiraMetrics.sprint_completed_issues())
 
-	for k in swimlanes_metrics.keys():
-		print k, str(swimlanes_metrics[k]['delta'])
-
+	print '\tIncompleted Issues:'
+	print_issues_list(jiraMetrics, jiraMetrics.sprint_incompleted_issues())

@@ -160,7 +160,7 @@ def print_issues_list(jiraMetrics, issues):
 		print '\t\t\t----------------'
 		print '\t\t\tLead Time: %s' % str(issue_lead_time)
 		print '\t\t\t----------------'
-		print '\t\t\tSwimlane Breakdonw'
+		print '\t\t\tSwimlane Breakdown'
 		print '\t\t\t----------------'
 		print '\t\t\tIdle: %s' % swimlanes_metrics['Idle']['delta']
 		print '\t\t\tDevelopment: %s' % swimlanes_metrics['Development']['delta']

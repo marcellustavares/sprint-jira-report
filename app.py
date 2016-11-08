@@ -55,9 +55,10 @@ class JiraMetrics(object):
 
 		return (completed_issues_count / float(total_issues_count)) * 100
 
-	def get_issue_swimlanes_metrics(self, issue_key):
-		issue = self.jira.issue(issue_key, expand='changelog')
+	def get_issue(self, issue_key):
+		return self.jira.issue(issue_key, expand='changelog')
 
+	def get_issue_swimlanes_metrics(self, issue):
 		issue_created_date = self.__parse_date(issue.fields.created)
 		issue_status_histories = self.__get_issue_status_hitories(issue)
 
@@ -132,8 +133,17 @@ def print_issues_list(jiraMetrics, issues):
 	for issue in issues:
 		print '\t\thttps://issues.liferay.com/browse/%s' % issue.key
 
-		swimlanes_metrics = jiraMetrics.get_issue_swimlanes_metrics(issue.key)
+		issue = jiraMetrics.get_issue(issue.key)
+		swimlanes_metrics = jiraMetrics.get_issue_swimlanes_metrics(issue)
+		test_labels = [label for label in issue.fields.labels if label.startswith('fw_test')]
 
+		print '\t\t\t----------------'
+		print '\t\t\tIssue Type: %s' % issue.fields.issuetype.name
+		print '\t\t\t----------------'
+		print '\t\t\tTest labels: %s' % str(test_labels)
+		print '\t\t\t----------------'
+		print '\t\t\tSwimlane Metrics'
+		print '\t\t\t----------------'
 		print '\t\t\tIdle: %s' % swimlanes_metrics['Idle']['delta']
 		print '\t\t\tDevelopment: %s' % swimlanes_metrics['Development']['delta']
 		print '\t\t\tCode Review: %s' % swimlanes_metrics['Code Review']['delta']

@@ -4,6 +4,7 @@ import sys, getopt
 
 from dateutil.parser import parse
 import argparse
+import datetime
 
 from jira import JIRA
 
@@ -137,12 +138,29 @@ def print_issues_list(jiraMetrics, issues):
 		swimlanes_metrics = jiraMetrics.get_issue_swimlanes_metrics(issue)
 		test_labels = [label for label in issue.fields.labels if label.startswith('fw_test')]
 
+		swinlanes = ['Idle', 'Development', 'Code Review', 'PM Review']
+		swimlanes_deltas = []
+
+		for swinlane in swinlanes:
+			delta = swimlanes_metrics[swinlane]['delta']
+
+			if delta != None:
+				swimlanes_deltas.append(delta)
+
+		issue_lead_time = datetime.timedelta(0, 0)
+
+		for swimlanes_delta in swimlanes_deltas:
+			issue_lead_time += swimlanes_delta
+
+
 		print '\t\t\t----------------'
 		print '\t\t\tIssue Type: %s' % issue.fields.issuetype.name
 		print '\t\t\t----------------'
-		print '\t\t\tTest labels: %s' % str(test_labels)
+		print '\t\t\tTest Labels: %s' % str(test_labels)
 		print '\t\t\t----------------'
-		print '\t\t\tSwimlane Metrics'
+		print '\t\t\tLead Time: %s' % str(issue_lead_time)
+		print '\t\t\t----------------'
+		print '\t\t\tSwimlane Breakdonw'
 		print '\t\t\t----------------'
 		print '\t\t\tIdle: %s' % swimlanes_metrics['Idle']['delta']
 		print '\t\t\tDevelopment: %s' % swimlanes_metrics['Development']['delta']
